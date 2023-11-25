@@ -1,178 +1,123 @@
 section .data
-    prompt1 db 'Enter the first integer: ', 0
-    prompt2 db 'Enter the second integer: ', 0
-    invalid_message db 'Invalid input. Please enter a valid integer.', 0
-    format db '%d', 0
+    msg1 db "Enter the first number: ", 0
+    msg2 db "Enter the second number: ", 0
+    error_msg db "Error: Please enter a valid integer!", 0
+    result_msg db "The result is: ", 0
 
 section .bss
     num1 resd 1
     num2 resd 1
-    input_buffer resb 8
+    input_buffer resb 5
 
 section .text
     global _start
 
 _start:
-    ; Выводим приглашение для ввода первого числа
+    ; Выводим сообщение для ввода первого числа
     mov eax, 4
     mov ebx, 1
-    mov ecx, prompt1
-    mov edx, 25
+    mov ecx, msg1
+    mov edx, 22
     int 0x80
 
-    ; Вводим первое число с клавиатуры
+    ; Читаем введенное первое число
     mov eax, 3
     mov ebx, 0
     mov ecx, input_buffer
-    mov edx, 8
+    mov edx, 5
     int 0x80
+    mov dword[num1], eax
 
-    ; Преобразуем введенную строку в целое число
-    mov eax, input_buffer
-    call atoi
-    mov [num1], eax
-
-    ; Выводим приглашение для ввода второго числа
+    ; Выводим сообщение для ввода второго числа
     mov eax, 4
     mov ebx, 1
-    mov ecx, prompt2
-    mov edx, 24
+    mov ecx, msg2
+    mov edx, 23
     int 0x80
 
-    ; Вводим второе число с клавиатуры
+    ; Читаем введенное второе число
     mov eax, 3
     mov ebx, 0
     mov ecx, input_buffer
-    mov edx, 8
+    mov edx, 5
+    int 0x80
+    mov dword[num2], eax
+
+    ; Проверяем, являются ли числа целыми
+    mov eax, dword[num1]
+    test al, 0x0f  ; Проверяем младший байт
+    jnz error       ; Если не целое, переходим к сообщению об ошибке
+    mov eax, dword[num2]
+    test al, 0x0f  ; Проверяем младший байт
+    jnz error       ; Если не целое, переходим к сообщению об ошибке
+
+    ; Отображаем результат
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, result_msg
+    mov edx, 13
     int 0x80
 
-    ; Преобразуем введенную строку во второе целое число
-    mov eax, input_buffer
-    call atoi
-    mov [num2], eax
+    ; Выводим первое число
+    mov eax, dword[num1]
+    mov ebx, 1
+    call print_integer
 
-    ; Проверяем, что оба числа являются допустимыми целыми числами (например, проверяем деление на 0)
-    cmp dword [num2], 0
-    je divide_by_zero_error
+    ; Выводим пробел
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, space
+    mov edx, 1
+    int 0x80
 
-    ; Выводим результат на экран
-    mov eax, [num1]
-    mov ebx, [num2]
-    call print_integers
+    ; Выводим второе число
+    mov eax, dword[num2]
+    mov ebx, 1
+    call print_integer
 
     ; Завершаем программу
     mov eax, 1
     xor ebx, ebx
     int 0x80
 
-; Процедура для преобразования строки в целое число
-atoi:
-    push ebx
-    push ecx
-    push edx
-    push eax
-    mov eax, 0
-    mov edi, 10
-
-atoi_loop:
-    xor edx, edx
-    lodsb
-    cmp al, 0
-    je atoi_done
-    cmp al, 0x30
-    jb atoi_error
-    cmp al, 0x39
-    ja atoi_error
-    sub al, 0x30
-    imul eax, edi
-    add eax, edx
-    jmp atoi_loop
-
-atoi_error:
-    mov eax, 0
-    jmp atoi_exit
-
-atoi_done:
-    pop edx
-    pop ecx
-    pop ebx
-    ret
-
-atoi_exit:
-    pop edx
-    pop ecx
-    pop ebx
-    ret
-
-; Процедура для вывода двух целых чисел на экран
-print_integers:
-    push ebp
-    mov ebp, esp
-    push eax
-    push ebx
-    mov eax, [ebp+8]
-    mov ebx, [ebp+12]
-    call print_integer
-    pop ebx
-    pop eax
-    call print_newline
-    pop ebp
-    ret
-
-; Процедура для вывода целого числа на экран
 print_integer:
-    push ebp
-    mov ebp, esp
-    mov eax, [ebp+8]
-    mov ebx, 10
-    sub esp, 1
-    xor edx, edx
-
-print_digit:
-    div ebx
-    add dl, '0'
-    mov [esp], dl
-    inc esp
-    test eax, eax
-    jnz print_digit
-
-print_loop:
-    sub esp, 1
-    movzx eax, byte [esp]
-    push eax
+    ; Рекурсивно выводим целое число в виде строки
+    mov ecx, 10  ; Делитель
+    xor edx, edx  ; Обнуляем edx для предотвращения ошибки деления
+.loop:
+    div ecx  ; Делим число на 10
+    push dx  ; Сохраняем остаток от деления
+    test eax, eax  ; Проверяем, закончили ли мы
+    jnz .loop  ; Если нет, продолжаем
+    mov eax, 4  ; Выводим остатки от деления (цифры числа)
+.print_loop:
+    pop dx
+    add dl, '0'  ; Конвертируем цифру в символ
     mov eax, 4
     mov ebx, 1
-    lea ecx, [esp]
-    mov edx, 1
     int 0x80
-    add esp, 2
-    inc esp
-    test esp, esp
-    jnz print_loop
 
-    pop ebp
-    ret
-
-; Процедура для вывода символа новой строки
-print_newline:
+    ; Выводим пробел
     mov eax, 4
     mov ebx, 1
-    mov ecx, newline
+    mov ecx, space
     mov edx, 1
     int 0x80
+
     ret
 
-; Обработка ошибки деления на 0
-divide_by_zero_error:
+error:
+    ; Выводим сообщение об ошибке
     mov eax, 4
-    mov ebx, 2
-    mov ecx, divide_by_zero_message
-    mov edx, 32
+    mov ebx, 1
+    mov ecx, error_msg
+    mov edx, 35
     int 0x80
+
+    ; Завершаем программу
     mov eax, 1
     xor ebx, ebx
     int 0x80
 
-section .bss
-    newline resb 1
-    divide_by_zero_message db 'Error: Division by zero.', 10
+section .data
+    space db " ", 0
