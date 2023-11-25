@@ -1,41 +1,38 @@
-section .data
-extern a
-extern b
-extern result_asm_num
-
-; b*a-20, если a<b 	20, если a=b 	9*a/b, если a>b
-
 section .text
-global calculate_expression_asm
-calculate_expression_asm:
-    mov eax, [a]
-    mov ebx, [b]
-    cmp eax, ebx   ; Сравнение a и b
-    jl less_than              ; Если a < b, переход к метке less_than
-    je equal                  ; Если a = b, переход к метке equal
-    jg greater_than           ; Если a > b, переход к метке greater_than
+global asmArrayProduct
 
-less_than:
-    mov eax, dword [a]        ; Загрузка значения a в EAX
-    imul eax, dword [b]       ; Умножение EAX на b
-    sub eax, 20               ; Вычитание 20 из EAX
-    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
-    ret
+asmArrayProduct:
+    push ebp
+    mov ebp, esp
 
-equal:
-    mov eax, 20               ; Загрузка значения 20 в EAX
-    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
-    ret
+    mov ebx, [ebp+8]  ; адрес массива A
+    mov ecx, [ebp+12] ; длина массива N
+    mov edx, [ebp+16] ; количество первых отрицательных элементов L
+    mov esi, [ebp+20] ; значение c
+    mov edi, [ebp+24] ; значение d
 
-greater_than:
-    cmp ebx, 0
-    je error	
-    mov eax, 9                ; Загрузка значения 9 в EAX
-    imul eax, dword [a]       ; Умножение EAX на a
-    cdq                       ; Расширение знака из EAX в EDX:EAX
-    idiv dword [b]            ; Деление EDX:EAX на b
-    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
-    ret
+    xor eax, eax      ; обнуляем регистр, в котором будет храниться произведение
+    mov ebp, 0        ; счетчик отрицательных элементов
 
-error:
-    ret
+    loop_start:
+        movzx edx, word [ebx] ; загружаем элемент массива
+        cmp edx, esi          ; проверяем, больше ли или равен элемент значения c
+        jl skip_condition     ; переход, если меньше
+        cmp edx, edi          ; проверяем, меньше ли или равен элемент значения d
+        jg skip_condition     ; переход, если больше
+        test edx, edx         ; проверяем, отрицательное ли число
+        js process_negative   ; переход, если отрицательное
+    skip_condition:
+        add ebx, 2            ; переходим к следующему элементу массива
+        loop loop_start       ; повторяем для остальных элементов
+        jmp loop_end          ; выходим из цикла
+
+    process_negative:
+        imul eax, edx         ; перемножаем элемент на текущее значение произведения
+        inc ebp               ; увеличиваем счетчик отрицательных элементов
+        cmp ebp, edx          ; сравниваем счетчик с количеством первых отрицательных элементов
+        je loop_end           ; если счетчик равен L, выходим из цикла
+
+    loop_end:
+        pop ebp
+        ret

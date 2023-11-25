@@ -1,43 +1,45 @@
 #include <stdio.h>
-#include <stdint.h>
-#include <inttypes.h>
 
-int a, b, result_asm_denom;
-long result, result_asm_num;
-extern void calculate_expression_asm();
-
-long calculate_expression(int a, int b) {
-    if (a < b) {
-        return b * a - 20;
-    } else if (a == b) {
-        return 20;
-    } else {
-        return 9 * a / b;
+// Функция для ввода элементов массива А
+void inputArray(int A[], int N) {
+    printf("Введите элементы массива:\n");
+    for (int i = 0; i < N; i++) {
+        printf("A[%d]: ", i);
+        scanf("%d", &A[i]);
     }
 }
 
-int check_int(int num) {
- if (num >= -32768 && num<=32767){
-	printf("\nValue %d is correct", num);
-	return 1;
- }
- else{
-	printf("\nValue %d has error!\n", num);
-	return 0;
- }
-}
-
-int main() {
-    printf("b*a-20, если a<b\n20, если a=b\n9*a/b, если a>b\n");
-    printf("Enter values for a and b from -32768 to 32767: ");
-    scanf("%d %d", &a, &b);
-    
-    if (check_int(a) == 1 && check_int(b) == 1){
-	    result = calculate_expression(a, b);
-	    printf("\n\nC Result: X=%ld\n", result);
-	    calculate_expression_asm();
-	    printf("\n\nAssembly Result: X=%ld\n", result_asm_num);
+// Функция для вывода элементов массива А
+void outputArray(int A[], int N) {
+    printf("Элементы массива:\n");
+    for (int i = 0; i < N; i++) {
+        printf("%d ", A[i]);
     }
     printf("\n");
+}
+
+// Функция для вызова модуля обработки на языке Ассемблера
+extern int asmArrayProduct(int A[], int N, int L, int c, int d);
+
+int main() {
+    int N, L, c, d;
+    printf("Введите длину массива N: ");
+    scanf("%d", &N);
+    int A[N];
+
+    inputArray(A, N);
+    
+    printf("Введите количество первых отрицательных элементов L: ");
+    scanf("%d", &L);
+    printf("Введите значение c: ");
+    scanf("%d", &c);
+    printf("Введите значение d: ");
+    scanf("%d", &d);
+    
+    outputArray(A, N);
+    
+    int result = asmArrayProduct(A, N, L, c, d);
+    printf("Произведение первых %d отрицательных элементов массива, удовлетворяющих условию %d <= a[i] <= %d, составляет: %d\n", L, c, d, result);
+
     return 0;
 }
