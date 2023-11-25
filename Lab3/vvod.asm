@@ -1,41 +1,109 @@
 section .data
+    input_msg db 'Enter value for a (0-9): ', 0
+    input_msg_len equ $ - input_msg
+    error_msg db 'Error: invalid input', 0
+    result_msg db 'Result: ', 0
+    result_msg_len equ $ - result_msg
+
+section .bss
+    input_buffer resb 10
+    result resb 10
+
+section .text
+global _start
+
+extern calculate_expression_asm
 extern a
 extern b
 extern result_asm_num
 
-; b*a-20, если a<b 	20, если a=b 	9*a/b, если a>b
+_start:
+    ; Ввод значения для a
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, input_msg
+    mov edx, input_msg_len
+    int 0x80
 
-section .text
-global calculate_expression_asm
-calculate_expression_asm:
-    mov eax, [a]
-    mov ebx, [b]
-    cmp eax, ebx   ; Сравнение a и b
-    jl less_than              ; Если a < b, переход к метке less_than
-    je equal                  ; Если a = b, переход к метке equal
-    jg greater_than           ; Если a > b, переход к метке greater_than
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, input_buffer
+    mov edx, 10
+    int 0x80
 
-less_than:
-    mov eax, dword [a]        ; Загрузка значения a в EAX
-    imul eax, dword [b]       ; Умножение EAX на b
-    sub eax, 20               ; Вычитание 20 из EAX
-    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
-    ret
+    ; Проверка ввода для a
+    mov eax, input_buffer
+    cmp eax, '0'
+    jl input_error
+    cmp eax, '9'
+    jg input_error
 
-equal:
-    mov eax, 20               ; Загрузка значения 20 в EAX
-    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
-    ret
+    mov [a], eax
 
-greater_than:
-    cmp ebx, 0
-    je error	
-    mov eax, 9                ; Загрузка значения 9 в EAX
-    imul eax, dword [a]       ; Умножение EAX на a
-    cdq                       ; Расширение знака из EAX в EDX:EAX
-    idiv dword [b]            ; Деление EDX:EAX на b
-    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
-    ret
+    ; Ввод значения для b
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, input_msg
+    mov edx, input_msg_len
+    int 0x80
 
-error:
-    ret
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, input_buffer
+    mov edx, 10
+    int 0x80
+
+    ; Проверка ввода для b
+    mov eax, input_buffer
+    cmp eax, '0'
+    jl input_error
+    cmp eax, '9'
+    jg input_error
+
+    mov [b], eax
+
+    ; Вызов функции calculate_expression_asm
+    call calculate_expression_asm
+
+    ; Проверка результата на допустимые значения
+    cmp dword [result_asm_num], 100   ; Проверка на значение больше 100
+    jg result_error
+    cmp dword [result_asm_num], -100  ; Проверка на значение меньше -100
+    jl result_error
+
+    ; Вывод результата
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, result_msg
+    mov edx, result_msg_len
+    int 0x80
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, result_asm_num
+    mov edx, 10
+    int 0x80
+
+exit:
+    ; Выход из программы
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
+
+input_error:
+    ; Вывод сообщения об ошибке ввода для a или b
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, error_msg
+    mov edx, error_msg_len
+    int 0x80
+
+result_error:
+    ; Вывод сообщения об ошибке результата вычисления
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, error_msg
+    mov edx, error_msg_len
+    int 0x80
+
+    jmp exit
