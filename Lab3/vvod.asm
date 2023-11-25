@@ -8,11 +8,14 @@ section .data
     error_msg db "Ошибка: Неверный ввод", 0
     result_msg db "Результат: ", 0
     newline db 10, 0
+    extern a
+    extern b
+    extern calculate_expression_asm
 
 section .text
-    global _start
+global vvod
 
-_start:
+vvod:
     ; ввод a
     mov eax, 4
     mov ebx, 1
