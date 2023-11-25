@@ -12,17 +12,18 @@ extern remainder_asm
 section .text
 global asmfunc
 asmfunc:
+	mov ax, [a]    ; Загрузка значения a в AX
+    	shr ax, 1           ; Половинное деление значения a, т.е. побитовый сдвиг
+    	mov bx, [c]
+    	sub bx, ax          ; Вычитание a/2 из с
+    	inc bx
+    	mov [denominator_asm], bx
+
    	mov eax, [a]
     	imul eax, -3         ; Умножение EAX на -3
     	sub eax, [b]          ; Вычитание b из EAX
     	add eax, 53          ; Добавление 53 к EAX
     	mov [numerator_asm], eax
-    	
-    	mov ax, [a]    ; Загрузка значения a в AX
-    	shr ax, 1           ; Половинное деление значения a, т.е. побитовый сдвиг
-    	sub bx, [c]          ; Вычитание a/2 из с
-    	inc ax
-    	mov [denominator_asm], ax
     	
     	mov eax, dword [numerator_asm]
     	cdq
