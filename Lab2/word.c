@@ -1,16 +1,22 @@
 #include <stdio.h>
 #include <stdint.h>
 
-int a, b, result, result_asm_num, result_asm_denom;
+unsigned int a, b;
+int result, result_asm_num, result_asm_denom;
 extern void calculate_expression_asm();
 
-int calculate_expression(int a, int b) {
+int calculate_expression(unsigned int a, unsigned int b) {
     if (a < b) {
         return b * a - 20;
     } else if (a == b) {
         return 20;
     } else {
-        return 9 * a / b;
+    	if (b == 0){
+    	printf("Error! b cannot be 0");
+    	return 0;
+    	}
+    	else
+        	return 9 * a / b;
     }
 }
 
@@ -24,13 +30,24 @@ int check_int(int num) {
 	return 0;
  }
 }
+ 
+unsigned int check_uint(unsigned int num) {
+ if (num >= 0 && num<=65535){
+	printf("\nValue %u is correct", num);
+	return 1;
+ }
+ else{
+	printf("\nValue %u has error!\n", num);
+	return 0;
+ }
+}
 
 int main() {
     printf("b*a-20, если a<b\n20, если a=b\n9*a/b, если a>b\n");
-    printf("Enter values for a and b from -32768 to 32767: ");
-    scanf("%d %d", &a, &b);
+    printf("Enter values for a and b from 0 to 65535: ");
+    scanf("%u %u", &a, &b);
     
-    if (check_int(a) == 1 && check_int(b) == 1){
+    if (check_uint(a) == 1 && check_uint(b) == 1){
 	    result = calculate_expression(a, b);
 	    printf("\n\nC Result: X=%d\n", result);
 	    check_int(result);
