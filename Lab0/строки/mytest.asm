@@ -1,108 +1,78 @@
-use16                   ;Генерировать 16-битный код
-org 100h                ;Программа начинается с адреса 100h
-    jmp start           ;Переход на метку start
-;----------------------------------------------------------------------
-msg1    db 'Hello!$'
-msg2    db 'asmworld.ru$'
-msg3    db 'Press any key...$'
-;----------------------------------------------------------------------
-start:
-    mov bx,msg1
-    call print_message  ;Вывод первого сообщения
-    mov bx,msg2
-    call print_message  ;Вывод второго сообщения
-    mov bx,msg3
-    call print_message  ;Вывод третьего сообщения
- 
-    mov ah,8            ;Ввод символа без эха
-    int 21h
- 
-    mov ax,4C00h        ;\
-    int 21h             ;/ Завершение программы
- 
-;----------------------------------------------------------------------
-;Процедура вывода сообщения в рамке
-;В BX передаётся адрес строки
-print_message:
-    push ax             ;Сохранение регистров
-    push cx
-    push dx
- 
-    call get_length     ;Вызов процедуры вычисления длины строки
-    mov cx,ax           ;Копируем длину строки в CX
-    mov ah,2            ;Функция DOS 02h - вывод символа
-    mov dl,0xDA         ;Левый верхний угол
-    int 21h
-    mov dl,0xC4         ;Горизонтальная линия
-    call draw_line      ;Вызов процедуры рисования линии
-    mov dl,0xBF         ;Правый верхний угол
-    int 21h
-    call print_endline  ;Вызов процедуры вывода конца строки
- 
-    mov dl,0xB3         ;Вертикальная линия
-    int 21h
-    mov ah,9            ;Функция DOS 09h - вывод строки
-    mov dx,bx           ;Адрес строки в DX
-    int 21h
-    mov ah,2            ;Функция DOS 02h - вывод символа
-    mov dl,0xB3         ;Вертикальная линия
-    int 21h
-    call print_endline  ;Вызов процедуры вывода конца строки
- 
-    mov dl,0xC0         ;Левый нижний угол
-    int 21h
-    mov dl,0xC4         ;Горизонтальная линия
-    call draw_line
-    mov dl,0xD9         ;Правый нижний угол
-    int 21h
-    call print_endline  ;Вызов процедуры вывода конца строки
- 
-    pop dx              ;Восстановление регистров
-    pop cx
-    pop ax
-    ret                 ;Возврат из процедуры
- 
-;----------------------------------------------------------------------
-;Процедура вычисления длины строки (конец строки - символ '$').
-;В BX передаётся адрес строки.
-;Возвращает длину строки в регистре AX.
-get_length:
-    push bx             ;Сохранение регистра BX
-    xor ax,ax           ;Обнуление AX
-str_loop:
-    cmp byte[bx],'$'    ;Проверка конца строки
-    je str_end          ;Если конец строки, то выход из процедуры
-    inc ax              ;Инкремент длины строки
-    inc bx              ;Инкремент адреса
-    jmp str_loop        ;Переход к началу цикла
-str_end:
-    pop bx              ;Восстановление регистра BX
-    ret                 ;Возврат из процедуры
- 
-;----------------------------------------------------------------------
-;Процедура рисования линии из символов.
-;В DL - символ, в CX - длина линии (кол-во символов)
-draw_line:
-    push ax             ;Сохранение регистров
-    push cx
-    mov ah,2            ;Функция DOS 02h - вывод символа
-drl_loop:
-    int 21h             ;Обращение к функции DOS
-    loop drl_loop       ;Команда цикла
-    pop cx              ;Восстановление регистров
-    pop ax
-    ret                 ;Возврат из процедуры
- 
-;----------------------------------------------------------------------
-;Процедура вывода конца строки (CR+LF)
-print_endline:
-    push ax             ;Сохранение регистров
-    push dx
-    mov ah,2            ;Функция DOS 02h - вывод символа
-    mov dl,13           ;Символ CR
-    int 21h
-    mov dl,10           ;Символ LF
-    int 21h
-    pop dx              ;Восстановление регистров
-    pop ax
-    ret                 ;Возврат из процедуры
+section .data
+    input_msg db 'Enter the first number: ', 0
+    input_msg_len equ $ - input_msg
+    error_msg db 'Error: invalid input', 0 
+    result_msg db 'The numbers you entered are: ', 0
+    result_msg_len equ $ - result_msg
+
+section .bss
+    input_buffer resb 10
+    result resb 10
+
+section .text
+global _start
+
+extern atoi
+extern printf
+
+_start:
+    ; Ввод первого числа
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, input_msg
+    mov edx, input_msg_len
+    int 0x80
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, input_buffer
+    mov edx, 10
+    int 0x80
+
+    ; Проверка ввода для первого числа
+    mov eax, input_buffer
+    call atoi
+    test eax, eax
+    jz input_error
+
+    ; Сохранение первого числа в результирующей строке
+    mov [result], eax
+
+    ; Ввод второго числа
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, input_msg
+    mov edx, input_msg_len
+    int 0x80
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, input_buffer
+    mov edx, 10
+    int 0x80
+
+    ; Проверка ввода для второго числа
+    mov eax, input_buffer
+    call atoi
+    test eax, eax
+    jz input_error
+
+    ; Сохранение второго числа в результирующей строке
+    mov [result+4], eax
+
+    ; Вывод результатов на экран
+    mov eax, result_msg
+    call printf
+
+exit:
+    ; Выход из программы
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
+
+input_error:
+    ; Вывод сообщения об ошибке ввода чисел
+    mov eax, error_msg
+    call printf
+
+    jmp exit
