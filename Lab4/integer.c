@@ -19,15 +19,15 @@ void outputArray(int A[], int N) {
 }
 
 // Функция для вызова модуля обработки на языке Ассемблера
-extern int asmArrayProduct(int A[], int N, int L, int c, int d);
+extern void asmArrayFunc();
+int N, L, c, d, result_asm;
+int arr[];
 
 int main() {
-    int N, L, c, d;
     printf("Введите длину массива N: ");
     scanf("%d", &N);
-    int A[N];
 
-    inputArray(A, N);
+    inputArray(arr, N);
     
     printf("Введите количество первых отрицательных элементов L: ");
     scanf("%d", &L);
@@ -36,10 +36,26 @@ int main() {
     printf("Введите значение d: ");
     scanf("%d", &d);
     
-    outputArray(A, N);
+    outputArray(arr, N);
     
-    int result = asmArrayProduct(A, N, L, c, d);
-    printf("Произведение первых %d отрицательных элементов массива, удовлетворяющих условию %d <= a[i] <= %d, составляет: %d\n", L, c, d, result);
+    int result_c = 1;
+    int count = 0;
+
+    for (int i = 0; i < N; i++) {
+        if (arr[i] >= c && arr[i] <= d) {
+            if (arr[i] < 0) {
+                result_c *= arr[i];
+                count++;
+            }
+            if (count == L) {
+                break;
+            }
+        }
+    }
+
+    printf("Результат на СИ: произведение первых %d отрицательных элементов в промежутке [%d, %d] равно: %d\n", L, c, d, result_c);
+    asmArrayFunc();
+    printf("Результат на ассемблер: произведение первых %d отрицательных элементов в промежутке [%d, %d] равно: %d\n", L, c, d, result_asm);
 
     return 0;
 }
