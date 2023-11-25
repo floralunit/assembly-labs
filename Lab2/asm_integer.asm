@@ -2,35 +2,32 @@ section .data
 extern a
 extern b
 extern c
-extern numerator_asm
-extern denominator_asm
-extern result_asm
-extern remainder_asm
-
-; y = (-3*a-b+53)/(c-a/2+1)
+extern result_asm_num
 
 section .text
-global asmfunc
-asmfunc:
-	movsx eax, byte [a]
-    	imul eax, -3         ; Умножение EAX на -3
-    	movsx ebx, byte [b]          ; Вычитание b из EAX
-    	sub eax, ebx
-    	add eax, 53          ; Добавление 53 к EAX
-    	mov [numerator_asm], eax
-    	
-    	movsx ebx, byte [a]    ; Загрузка значения a в AX
-    	sar ebx, 1           ; Половинное деление значения a, т.е. побитовый сдвиг
-    	movsx ecx, byte [c]          ; Вычитание a/2 из с
-    	sub ecx, ebx
-    	inc ecx
-    	mov [denominator_asm], ecx
-    	
-    	mov eax, dword [numerator_asm]
-    	cdq
-    	idiv dword [denominator_asm]
-    	mov dword [result_asm], eax
-    	mov dword [remainder_asm], edx
+global calculate_expression_asm
+calculate_expression_asm:
+    cmp dword [a], dword [b]   ; Сравнение a и b
+    jl less_than              ; Если a < b, переход к метке less_than
+    je equal                  ; Если a = b, переход к метке equal
+    jg greater_than           ; Если a > b, переход к метке greater_than
 
-	ret
+less_than:
+    mov eax, dword [a]        ; Загрузка значения a в EAX
+    imul eax, dword [b]       ; Умножение EAX на b
+    sub eax, 20               ; Вычитание 20 из EAX
+    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
+    ret
 
+equal:
+    mov eax, 20               ; Загрузка значения 20 в EAX
+    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
+    ret
+
+greater_than:
+    mov eax, 9                ; Загрузка значения 9 в EAX
+    imul eax, dword [a]       ; Умножение EAX на a
+    cdq                       ; Расширение знака из EAX в EDX:EAX
+    idiv dword [b]            ; Деление EDX:EAX на b
+    mov [result_asm_num], eax ; Сохранение результата в result_asm_num
+    ret

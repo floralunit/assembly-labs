@@ -1,35 +1,27 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
 
-int8_t a, b, c;
-int numerator_c, denominator_c, result_c;
-int numerator_asm, remainder_asm, denominator_asm, result_asm;
+extern int result_asm_num;
+extern int result_asm_denom;
 
-extern  void  asmfunc();
+int calculate_expression(int a, int b, int c) {
+    if (a < b) {
+        return b * a - 20;
+    } else if (a == b) {
+        return 20;
+    } else {
+        return 9 * a / b;
+    }
+}
 
-int main (void)
-{
-	printf("(-3*a-b+53)/(c-a/2+1)");
-	
-	printf("\nEnter a from -128 to 127 = ");
-	scanf("%hhd", &a);
-	printf("Enter b from -128 to 127 = ");
-	scanf("%hhd", &b);
-	printf("Enter c from -128 to 127 = ");
-	scanf("%hhd", &c);
-	
-	numerator_c = -1 * 3 * a - b + 53;
-  	denominator_c = c - a/2 + 1;
+int main() {
+    int a, b, c, result;
 
-  	result_c = numerator_c / denominator_c;
-  	int remainder = numerator_c % denominator_c;
-	
-	printf("\nРезультат на Си: целое = %d, остаток = %d, числитель = %d, знаменатель = %d", result_c, remainder, numerator_c, denominator_c);
-	
-	asmfunc();
-	printf("\nРезультат на ассемблере: целое = %d, остаток = %d, числитель = %d, знаменатель = %d", result_asm, remainder_asm, numerator_asm, denominator_asm);
-    	
-    	printf("\n\n");
-    	return 0;
+    printf("Enter values for a, b, and c: ");
+    scanf("%d %d %d", &a, &b, &c);
+
+    result = calculate_expression(a, b, c);
+    printf("Result: %d\n", result);
+    
+    return 0;
 }
