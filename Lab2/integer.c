@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 
-int a, b, result, result_asm_num, result_asm_denom;
+int a, b, result_asm_denom;
+long result, result_asm_num;
 extern void calculate_expression_asm();
 
-int calculate_expression(int a, int b) {
+long calculate_expression(int a, int b) {
     if (a < b) {
         return b * a - 20;
     } else if (a == b) {
@@ -32,11 +34,9 @@ int main() {
     
     if (check_int(a) == 1 && check_int(b) == 1){
 	    result = calculate_expression(a, b);
-	    printf("\n\nC Result: X=%d\n", result);
-	    check_int(result);
+	    printf("\n\nC Result: X=%ld\n", result);
 	    calculate_expression_asm();
-	    printf("\n\nAssembly Result: X=%d\n", result_asm_num);
-	    check_int(result_asm_num);
+	    printf("\n\nAssembly Result: X=%ld\n", result_asm_num);
     }
     printf("\n");
     return 0;
