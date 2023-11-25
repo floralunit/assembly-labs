@@ -10,9 +10,9 @@ section .bss
     input_buffer resb 5
 
 section .text
-    global _start
+    global main
 
-_start:
+main:
     ; Выводим сообщение для ввода первого числа
     mov eax, 4
     mov ebx, 1
