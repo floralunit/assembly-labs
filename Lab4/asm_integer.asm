@@ -10,11 +10,12 @@ section .text
 global asmArrayFunc
 
 asmArrayFunc:
-    vor eax, eax
-    movzx ebx, byte [N]
-    mov ecx, 0
-
+xor eax, eax
+ movzx ebx, byte [len] ; условие выхода из цикла
+ mov ecx, 0 ; счетчик цикла
 @lab:
-    
-    loop_end:
-        ret
+mov [arrByte + ecx], cl ; *(arrByte + ecx) = cl – инициализируем значением младшего байта счетчика
+ inc ecx ; увеличиваем счетчик
+ cmp ecx, ebx ; проверяем условие выхода из цикла
+ jb @lab
+ ret
