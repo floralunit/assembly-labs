@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-float a, b, numerator_c, denominator_c, result_c, numerator_asm, remainder_asm, denominator_asm, result_asm;
+float a, b, numerator_c, denominator_c, result_c, numerator_asm, denominator_asm, result_asm;
 int c;
 
 extern  void  asmfunc();
@@ -23,10 +23,10 @@ int main (void)
 
   	result_c = numerator_c / denominator_c;
 	
-	printf("\nРезультат на Си: целое = %f, числитель = %f, знаменатель = %f", result_c, numerator_c, denominator_c);
+	printf("\nРезультат на Си: результат = %f, числитель = %f, знаменатель = %f", result_c, numerator_c, denominator_c);
 	
 	asmfunc();
-	printf("\nРезультат на ассемблере: целое = %f, остаток = %f, числитель = %f, знаменатель = %f", result_asm, remainder_asm, numerator_asm, denominator_asm);
+	printf("\nРезультат на ассемблере: результат = %f, числитель = %f, знаменатель = %f", result_asm, numerator_asm, denominator_asm);
     	
     	printf("\n\n");
     	return 0;
