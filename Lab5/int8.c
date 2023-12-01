@@ -2,9 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-int8_t a, b, c;
-int numerator_c, denominator_c, result_c;
-int numerator_asm, remainder_asm, denominator_asm, result_asm;
+float a, b, numerator_c, denominator_c, result_c, numerator_asm, remainder_asm, denominator_asm, result_asm;
+int c;
 
 extern  void  asmfunc();
 
@@ -12,23 +11,22 @@ int main (void)
 {
 	printf("(-3*a-b+53)/(c-a/2+1)");
 	
-	printf("\nEnter a from -128 to 127 = ");
-	scanf("%hhd", &a);
-	printf("Enter b from -128 to 127 = ");
-	scanf("%hhd", &b);
-	printf("Enter c from -128 to 127 = ");
-	scanf("%hhd", &c);
+	printf("\nEnter a (float) = ");
+	scanf("%f", &a);
+	printf("Enter b (float) = ");
+	scanf("%f", &b);
+	printf("Enter c (integer) = ");
+	scanf("%d", &c);
 	
 	numerator_c = -1 * 3 * a - b + 53;
   	denominator_c = c - a/2 + 1;
 
   	result_c = numerator_c / denominator_c;
-  	int remainder = numerator_c % denominator_c;
 	
-	printf("\nРезультат на Си: целое = %d, остаток = %d, числитель = %d, знаменатель = %d", result_c, remainder, numerator_c, denominator_c);
+	printf("\nРезультат на Си: целое = %f, числитель = %f, знаменатель = %f", result_c, numerator_c, denominator_c);
 	
 	asmfunc();
-	printf("\nРезультат на ассемблере: целое = %d, остаток = %d, числитель = %d, знаменатель = %d", result_asm, remainder_asm, numerator_asm, denominator_asm);
+	printf("\nРезультат на ассемблере: целое = %f, остаток = %f, числитель = %f, знаменатель = %f", result_asm, remainder_asm, numerator_asm, denominator_asm);
     	
     	printf("\n\n");
     	return 0;
