@@ -1,29 +1,44 @@
 section .data
-three dd -3.
-fivethree dd 53.
-extern a
-extern b
-extern c
-extern numerator_asm
-extern denominator_asm
-extern result_asm
-extern remainder_asm
-
-; y = (-3*a-b+53)/(c-a/2+1)
+    a dd 0.0
+    b dd 0.0
+    c dd 0
+    numerator dd 0.0
+    denominator dd 0.0
+    result dd 0.0
 
 section .text
-global asmfunc
+    global _start
 
-asmfunc:
-    finit
-    fild dword [three]        ; загрузка переменной a в стек сопроцессора
-    fmul ST0, ST0
-    ;fild -3.0
-    ;fmul ST0, ST1        ; умножение на -3
-    ;fld dword [b]          ; загрузка переменной b в стек сопроцессора
-    ;fsub ST0, ST1                   ; вычитание b из -3*a
-    ;fld 53.0          ; загрузка числа 53 в стек сопроцессора
-    ;fadd ST0, ST2                    ; сложение с -3*a-b
-    fstp dword [numerator_asm]  ; сохранение результата в переменную numerator
+_start:
+    ; ввод исходных данных с клавиатуры
+    ; вывод диапазона возможных значений
+    ; ...
 
-    ret
+    ; вычисление числителя (-3*a-b+53)
+    fld dword [a]          ; загрузка переменной a в стек сопроцессора
+    fmul dword -3.0        ; умножение на -3
+    fld dword [b]          ; загрузка переменной b в стек сопроцессора
+    fsub                    ; вычитание b из -3*a
+    fld dword 53.0          ; загрузка числа 53 в стек сопроцессора
+    fadd                    ; сложение с -3*a-b
+    fstp dword [numerator]  ; сохранение результата в переменную numerator
+
+    ; вычисление знаменателя (c-a/2+1)
+    fld dword [c]          ; загрузка переменной c в стек сопроцессора
+    fld dword [a]          ; загрузка переменной a в стек сопроцессора
+    fdiv dword 2.0         ; деление a на 2
+    fsub                    ; вычитание a/2 из c
+    fld dword 1.0           ; загрузка числа 1 в стек сопроцессора
+    fadd                    ; сложение с c-a/2
+    fstp dword [denominator] ; сохранение результата в переменную denominator
+
+    ; вычисление результата числитель/знаменатель
+    fld dword [numerator]     ; загрузка числителя в стек сопроцессора
+    fld dword [denominator]   ; загрузка знаменателя в стек сопроцессора
+    fdiv                        ; деление числителя на знаменатель
+    fstp dword [result]         ; сохранение результата в переменную result
+
+    ; вывод результатов вычислений на экран
+    ; ...
+
+    ; завершение программы
