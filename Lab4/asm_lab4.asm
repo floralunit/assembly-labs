@@ -15,19 +15,24 @@ asmArrayFunc:
 
 cycle:
     mov eax, dword [arr + ecx * 4]
-    mov dword [result_asm], eax  
+    cmp eax, 0
+    jl check_conditions
+    jmp next_iteration
+
+next_iteration:  
+    inc ecx
+    cmp ecx, [N] ; условие выхода из цикла
+    jng cycle
+    ret
+
+check_conditions:
     cmp eax, [d]
     jg next_iteration
     cmp eax, [c]
     jl next_iteration
-    mov dword [result_asm], eax    
+    mov ebx, dword [result_asm]
+    imul ebx, eax
+    mov dword [result_asm], ebx
+    jmp next_iteration  
 
-next_iteration:   
-    inc ecx
-    cmp ecx, [N] ; условие выхода из цикла
-    jng cycle
-    end_loop
-    
-end_loop:
-    ret
 
