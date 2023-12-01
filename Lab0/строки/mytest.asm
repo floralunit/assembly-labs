@@ -2,9 +2,9 @@ section .bss
     buffer resb 16
 
 section .text
-    global _start
+    global main
 
-_start:
+main:
     ; Read from console
     mov eax, 3
     mov ebx, 0
