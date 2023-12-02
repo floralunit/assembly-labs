@@ -1,15 +1,6 @@
-section .data
-extern a
-extern b
-extern result_asm_num
-
 ; b*a-20, если a<b 	20, если a=b 	9*a/b, если a>b
 
-section .text
-global calculate_expression_asm
 calculate_expression_asm:
-    mov eax, [a]
-    mov ebx, [b]
     cmp eax, ebx   ; Сравнение a и b
     jl less_than              ; Если a < b, переход к метке less_than
     je equal                  ; Если a = b, переход к метке equal
@@ -29,7 +20,7 @@ equal:
 
 greater_than:
     cmp ebx, 0
-    je error	
+    je error_calc	
     mov eax, 9                ; Загрузка значения 9 в EAX
     imul eax, dword [a]       ; Умножение EAX на a
     cdq                       ; Расширение знака из EAX в EDX:EAX
@@ -37,5 +28,5 @@ greater_than:
     mov [result_asm_num], eax ; Сохранение результата в result_asm_num
     ret
 
-error:
+error_calc:
     ret
