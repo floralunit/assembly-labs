@@ -1,6 +1,8 @@
 ; b*a-20, если a<b 	20, если a=b 	9*a/b, если a>b
 
 calculate_expression_asm:
+    mov eax, [a]
+    mov ebx, [b]
     cmp eax, ebx   ; Сравнение a и b
     jl less_than              ; Если a < b, переход к метке less_than
     je equal                  ; Если a = b, переход к метке equal
@@ -11,11 +13,13 @@ less_than:
     imul eax, dword [b]       ; Умножение EAX на b
     sub eax, 20               ; Вычитание 20 из EAX
     mov [result_asm_num], eax ; Сохранение результата в result_asm_num
+    call write_eax
     ret
 
 equal:
     mov eax, 20               ; Загрузка значения 20 в EAX
     mov [result_asm_num], eax ; Сохранение результата в result_asm_num
+    call write_eax
     ret
 
 greater_than:
@@ -25,6 +29,7 @@ greater_than:
     imul eax, dword [a]       ; Умножение EAX на a
     cdq                       ; Расширение знака из EAX в EDX:EAX
     idiv dword [b]            ; Деление EDX:EAX на b
+    call write_eax
     mov [result_asm_num], eax ; Сохранение результата в result_asm_num
     ret
 
