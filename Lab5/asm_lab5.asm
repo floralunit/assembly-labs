@@ -36,3 +36,4 @@ asmfunc:
     fld dword [denominator_asm]   ; загрузка знаменателя в стек сопроцессора
     fdiv                        ; деление числителя на знаменатель
     fstp dword [result_asm]         ; сохранение результата в переменную result
+    ret

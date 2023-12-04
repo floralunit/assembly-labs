@@ -70,8 +70,11 @@ convert_write:
     ; Write to console
     mov eax, 4
     mov ebx, 1
-    lea ecx, [edi]
-    lea edx, [buffer + 16]
+    ;lea ecx, [edi]
+    ;lea edx, [buffer + 16]
+    mov ecx, edi
+    mov edx, buffer
+    add edx, 16
     sub edx, ecx
     int 0x80
     ret
@@ -114,6 +117,8 @@ error:
     jmp exit
     
 exit:
+mov ah, 0x4C
+int 0x21
 ret
     
 
